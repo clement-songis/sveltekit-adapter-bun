@@ -1,0 +1,25 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"printWidth": 100,
+	"sortPackageJson": false,
+	"svelte": {},
+	"overrides": [
+		{
+			"files": ["README.md"],
+			"options": {
+				"useTabs": false,
+				"tabWidth": 2
+			}
+		}
+	],
+	"ignorePatterns": [
+		"test/**/build/**",
+		"test/apps/websocket/variants/**",
+		"**/CHANGELOG.md",
+		"**/node_modules",
+		"**/.svelte-kit"
+	]
+}

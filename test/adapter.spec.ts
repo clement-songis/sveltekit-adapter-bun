@@ -48,7 +48,7 @@ describe('adapter contract', () => {
 	test('identifies itself and declares supported SvelteKit features', () => {
 		const instance = adapter();
 
-		expect(instance.name).toBe('@sveltejs/adapter-bun');
+		expect(instance.name).toBe('@chtibizoux/sveltekit-adapter-bun');
 		expect(instance.supports?.read?.({ route: { id: '/file' }, config: {} })).toBe(true);
 		expect(instance.supports?.instrumentation?.()).toBe(true);
 	});

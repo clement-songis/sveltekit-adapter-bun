@@ -98,7 +98,7 @@ export default function (opts = {}) {
 	const embed = !!buildOptions.compile;
 
 	return {
-		name: '@sveltejs/adapter-bun',
+		name: '@chtibizoux/sveltekit-adapter-bun',
 		async adapt(builder) {
 			if (typeof Bun === 'undefined') {
 				throw new Error(

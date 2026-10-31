@@ -1,19 +1,19 @@
 {
-	"name": "@sveltejs/adapter-bun",
-	"version": "1.0.0",
-	"description": "Adapter for SvelteKit apps that generates a standalone Bun server",
+	"name": "@chtibizoux/sveltekit-adapter-bun",
+	"version": "1.0.0-ws.1",
+	"description": "Fork of @sveltejs/adapter-bun with WebSocket support",
 	"keywords": [
 		"adapter",
 		"bun",
 		"deploy",
 		"hosting",
 		"svelte",
-		"sveltekit"
+		"sveltekit",
+		"websocket"
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/sveltejs/kit.git",
-		"directory": "packages/adapter-bun"
+		"url": "git+https://github.com/clement-songis/sveltekit-adapter-bun.git"
 	},
 	"license": "MIT",
 	"homepage": "https://svelte.dev/docs/kit/adapter-bun",
@@ -35,12 +35,13 @@
 	"scripts": {
 		"test": "bun test .spec",
 		"check": "tsc",
-		"lint": "prettier --check .",
-		"format": "pnpm lint --write"
+		"lint": "oxfmt --check .",
+		"format": "oxfmt --write ."
 	},
 	"devDependencies": {
 		"@sveltejs/kit": "^3.1.1",
 		"@types/node": "^24.19.2",
+		"oxfmt": "^0.75.0",
 		"typescript": "^6.0.3"
 	},
 	"dependencies": {
