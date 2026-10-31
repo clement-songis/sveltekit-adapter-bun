@@ -20,6 +20,7 @@ declare module '#@sveltejs/adapter-bun' {
 		| 'unix'
 		| 'ipv6Only'
 	>;
+	export const websocket_options: import('./index.js').WebSocketOptions;
 	/** `[helper, url, file, meta]`, where `file` is an embedded asset or a path below `dir` */
 	export const assets: Array<
 		[

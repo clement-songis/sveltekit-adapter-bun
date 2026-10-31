@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { dev_plugin, emulated_platform } from './dev.js';
 
 // posix so it matches the module ids Vite reports on every platform
 const files = fileURLToPath(new URL('./src', import.meta.url)).replaceAll('\\', '/');
@@ -93,6 +94,7 @@ export default function (opts = {}) {
 		envPrefix = '',
 		precompress = false,
 		serverOptions = {},
+		websocket = {},
 		buildOptions = {}
 	} = opts;
 	const embed = !!buildOptions.compile;
@@ -134,6 +136,7 @@ export default function (opts = {}) {
 					`export const env_prefix = ${JSON.stringify(envPrefix)};`,
 					`export const origin = ${JSON.stringify(builder.config.paths.origin)};`,
 					`export const server_options = ${JSON.stringify(serverOptions)};`,
+					`export const websocket_options = ${JSON.stringify(websocket)};`,
 					...(await create_routes({ builder, out, embed, precompress: precompress && !embed }))
 				].join('\n')
 			);
@@ -188,6 +191,11 @@ export default function (opts = {}) {
 			instrumentation: () => true
 		},
 
+		emulate() {
+			// SvelteKit's types require a platform, but it accepts none, as without `emulate`
+			return { platform: /** @type {() => App.Platform} */ (emulated_platform) };
+		},
+
 		vite: {
 			plugins: {
 				post: [
@@ -235,7 +243,8 @@ export default function (opts = {}) {
 								}
 							};
 						}
-					}
+					},
+					dev_plugin(websocket)
 				]
 			}
 		}

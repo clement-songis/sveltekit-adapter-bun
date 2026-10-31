@@ -11,6 +11,7 @@
 	},
 	"include": [
 		"index.js",
+		"dev.js",
 		"src/**/*.js",
 		"test/*.ts",
 		"tests/**/*.js",

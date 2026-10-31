@@ -12,6 +12,7 @@ export function mock_handoff({
 	env_prefix = '',
 	origin,
 	server_options = {},
+	websocket_options = {},
 	assets = [],
 	redirects = [],
 	server_assets = []
@@ -24,6 +25,7 @@ export function mock_handoff({
 	env_prefix?: string;
 	origin?: string;
 	server_options?: unknown;
+	websocket_options?: unknown;
 	assets?: unknown[];
 	redirects?: unknown[];
 	server_assets?: unknown[];
@@ -37,6 +39,7 @@ export function mock_handoff({
 		env_prefix,
 		origin,
 		server_options,
+		websocket_options,
 		assets,
 		redirects,
 		server_assets

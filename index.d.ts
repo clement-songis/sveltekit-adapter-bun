@@ -1,5 +1,37 @@
 import type { Adapter } from '@sveltejs/kit';
+import type { ServerWebSocket, WebSocketHandler as BunWebSocketHandler } from 'bun';
 import './ambient.js';
+
+/**
+ * Handles the WebSocket a request was upgraded to with `platform.upgrade`. The handler object
+ * is the socket's `ws.data`, so per-connection state can live on it.
+ */
+export interface WebSocketHandler {
+	/** Called when the server receives a message. */
+	message?(ws: ServerWebSocket<this>, message: string | Buffer<ArrayBuffer>): void | Promise<void>;
+	/** Called when the connection is opened. */
+	open?(ws: ServerWebSocket<this>): void | Promise<void>;
+	/** Called when the connection was under backpressure and is ready for more data. */
+	drain?(ws: ServerWebSocket<this>): void | Promise<void>;
+	/** Called when the connection is closed. */
+	close?(ws: ServerWebSocket<this>, code: number, reason: string): void | Promise<void>;
+	/** Called when a ping is received. */
+	ping?(ws: ServerWebSocket<this>, data: Buffer): void | Promise<void>;
+	/** Called when a pong is received. */
+	pong?(ws: ServerWebSocket<this>, data: Buffer): void | Promise<void>;
+}
+
+/** The JSON-serializable WebSocket settings of `Bun.serve`. */
+export type WebSocketOptions = Pick<
+	BunWebSocketHandler<WebSocketHandler>,
+	| 'maxPayloadLength'
+	| 'backpressureLimit'
+	| 'closeOnBackpressureLimit'
+	| 'idleTimeout'
+	| 'publishToSelf'
+	| 'sendPings'
+	| 'perMessageDeflate'
+>;
 
 interface AdapterOptions {
 	/**
@@ -46,6 +78,12 @@ interface AdapterOptions {
 		| 'unix'
 		| 'ipv6Only'
 	>;
+	/**
+	 * WebSocket settings passed to `Bun.serve`, such as `idleTimeout` or `maxPayloadLength`.
+	 * The options must be JSON-serializable.
+	 * @default {}
+	 */
+	websocket?: WebSocketOptions;
 	/**
 	 * Options for the `Bun.build` call that turns the server into an executable. Set `compile`
 	 * to create one; if it does not specify an outfile, the executable is written to

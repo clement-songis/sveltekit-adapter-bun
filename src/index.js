@@ -1,9 +1,11 @@
 /** @import { Serve } from 'bun' */
+/** @import { WebSocketHandler } from '../index.js' */
 import fs from 'node:fs';
 import process from 'node:process';
-import { server_options } from '#@sveltejs/adapter-bun';
+import { server_options, websocket_options } from '#@sveltejs/adapter-bun';
 import { routes } from './routes.js';
 import { handler } from './handler.js';
+import { websocket } from './websocket.js';
 import { boolean_env, bytes_env, env, number_env } from './env.js';
 
 // nothing enforces `engines.bun` at install time, and the build may have run on a newer Bun.
@@ -14,7 +16,7 @@ if (Bun.semver.order(Bun.version, '1.4.0') < 0) {
 	);
 }
 
-const options = /** @type {Serve.Options<undefined>} */ ({ ...server_options });
+const options = /** @type {Serve.Options<WebSocketHandler>} */ ({ ...server_options });
 
 const unix = env('SOCKET_PATH', options.unix);
 
@@ -54,6 +56,7 @@ const shutdown_timeout = number_env('SHUTDOWN_TIMEOUT', 30);
 
 options.fetch = handler;
 options.routes = routes;
+options.websocket = { ...websocket_options, ...websocket };
 
 const server = Bun.serve(options);
 

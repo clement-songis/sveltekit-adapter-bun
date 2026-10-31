@@ -33,7 +33,7 @@ test('normalizes the request origin from the Host header', async () => {
 
 	const [request, options] = loaded.respond.mock.calls[0];
 	expect(request.url).toBe('https://public.example:8080/path?query=yes');
-	expect(options.platform).toEqual({ server: loaded.bun_server });
+	expect(options.platform).toMatchObject({ server: loaded.bun_server, request: original });
 	loaded.request_ip.mockReturnValue({ address: '127.0.0.1', port: 5000, family: 'IPv4' });
 	expect(options.getClientAddress()).toBe('127.0.0.1');
 });
@@ -222,7 +222,8 @@ async function load_handler({
 	const { handler } = (await import(specifier)) as typeof import('../src/handler.js');
 
 	return {
-		handler,
+		// resolves to undefined only for WebSocket upgrades, which websocket.spec.ts covers
+		handler: handler as (...args: Parameters<typeof handler>) => Promise<Response>,
 		stream,
 		init,
 		respond,

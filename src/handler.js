@@ -1,7 +1,9 @@
 /** @import { Server as BunServer } from 'bun' */
+/** @import { WebSocketHandler } from '../index.js' */
 import { env_prefix, origin, server } from '#@sveltejs/adapter-bun';
 import { server_assets } from './routes.js';
 import { env, number_env } from './env.js';
+import { create_platform, create_upgrade_state } from './websocket.js';
 
 const address_header = env('ADDRESS_HEADER', '').toLowerCase();
 const protocol_header = env('PROTOCOL_HEADER', '').toLowerCase();
@@ -16,18 +18,22 @@ await server.init({
 
 /**
  * The Bun-native SvelteKit request handler used by the generated server.
+ * Resolves to `undefined` when the request was upgraded to a WebSocket.
  * @param {Request} request
- * @param {BunServer<undefined>} bun_server
- * @returns {Promise<Response>}
+ * @param {BunServer<WebSocketHandler>} bun_server
+ * @returns {Promise<Response | undefined>}
  */
 export async function handler(request, bun_server) {
 	const normalized_request = normalize_request(request);
 	if (normalized_request instanceof Response) return normalized_request;
 
+	const upgrade = create_upgrade_state();
 	const response = await server.respond(normalized_request, {
-		platform: { server: bun_server },
+		platform: create_platform(request, bun_server, upgrade),
 		getClientAddress: () => get_client_address(request, bun_server)
 	});
+
+	if (upgrade.upgraded) return;
 
 	if (response.headers.get('content-type')?.startsWith('text/event-stream')) {
 		bun_server.timeout(request, 0);
@@ -95,7 +101,7 @@ function get_origin(request, url) {
 
 /**
  * @param {Request} request
- * @param {BunServer<undefined>} bun_server
+ * @param {BunServer<WebSocketHandler>} bun_server
  * @returns {string}
  */
 function get_client_address(request, bun_server) {
