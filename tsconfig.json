@@ -13,6 +13,7 @@
 		"index.js",
 		"dev.js",
 		"src/**/*.js",
+		"scripts/*.js",
 		"test/*.ts",
 		"test/e2e/*.ts",
 		"tests/**/*.js",

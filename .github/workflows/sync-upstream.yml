@@ -1,0 +1,85 @@
+name: Sync upstream
+
+# Weekly, merges the latest release of sveltejs/kit's packages/adapter-bun into a pull request
+# that sets the version to `<upstream version>-ws.1`. The split history is published as the
+# `upstream-adapter-bun` branch.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency: sync-upstream
+
+jobs:
+  sync:
+    if: github.repository == 'clement-songis/sveltekit-adapter-bun'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Split upstream
+        run: |
+          scripts/sync-upstream.sh
+          git push --force origin upstream-adapter-bun
+
+      - name: Merge into a sync branch
+        id: merge
+        run: |
+          if git merge-base --is-ancestor upstream-adapter-bun origin/main; then
+            echo "main already contains upstream"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch --create sync/upstream origin/main
+
+          if git merge --no-edit upstream-adapter-bun; then
+            bun scripts/fork-version.js
+          # upstream and the fork bump "version" independently
+          elif [ "$(git diff --name-only --diff-filter=U)" = package.json ] && bun scripts/fork-version.js --resolve; then
+            git add package.json
+            git commit --quiet --no-edit
+          else
+            git merge --abort
+            echo "::error::Merging upstream conflicts. Merge the upstream-adapter-bun branch into main locally."
+            exit 1
+          fi
+
+          version="$(jq -r .version package.json)"
+          if ! git diff --quiet package.json; then
+            git commit --quiet --message "chore: release $version" package.json
+          fi
+          echo "merged=true" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # pull requests opened with the workflow token don't trigger CI, so test here
+      - name: Test
+        if: steps.merge.outputs.merged == 'true'
+        run: |
+          bun install
+          bun run check
+          bun run test
+          bun run test:e2e
+
+      - name: Open the pull request
+        if: steps.merge.outputs.merged == 'true'
+        env:
+          VERSION: ${{ steps.merge.outputs.version }}
+        run: |
+          git push --force origin sync/upstream
+          if [ -z "$(gh pr list --head sync/upstream --json number --jq '.[].number')" ]; then
+            gh pr create --head sync/upstream --base main \
+              --title "chore: merge upstream @sveltejs/adapter-bun, release $VERSION" \
+              --body "Merges the latest release of \`packages/adapter-bun\` from sveltejs/kit (branch \`upstream-adapter-bun\`) and sets the version to $VERSION. Tests passed in the sync job; merging publishes the release. Check upstream's CHANGELOG.md for breaking changes."
+          fi
