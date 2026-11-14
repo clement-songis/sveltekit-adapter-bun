@@ -134,8 +134,9 @@ serving `vite dev` with `Bun.serve`, and `emulate()` providing `platform` in dev
   `PROTOCOL_HEADER`, `HOST_HEADER`, `PORT_HEADER`, `ADDRESS_HEADER`, `XFF_DEPTH`,
   `BODY_SIZE_LIMIT`, `SHUTDOWN_TIMEOUT`, … instead of `HTTP_PORT`, `HTTP_HOST`, `HTTP_SOCKET`,
   `HTTP_PROTOCOL_HEADER`, `HTTP_IP_HEADER`, `WS_IDLE_TIMEOUT`, … WebSocket limits move to the
-  `websocket` adapter option, and SvelteKit's `paths.origin` replaces `HTTP_OVERRIDE_ORIGIN`.
-- Upstream assumes TLS terminates in front of the server: without `PROTOCOL_HEADER` or
+  `websocket` adapter option, and `ORIGIN` (or SvelteKit's `paths.origin`) replaces
+  `HTTP_OVERRIDE_ORIGIN`.
+- Upstream assumes TLS terminates in front of the server: without `PROTOCOL_HEADER`, `ORIGIN` or
   `paths.origin`, requests are seen as `https://`.
 - `customLaunch` is not ported; SvelteKit's `init` hook runs before `Bun.serve` starts listening.
 - `instrumentation.server.js` is supported.

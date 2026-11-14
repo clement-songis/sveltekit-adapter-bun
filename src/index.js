@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import process from 'node:process';
 import { server_options, websocket_options } from '#@sveltejs/adapter-bun';
-import { routes } from './routes.js';
+import { routes } from './assets.js';
 import { handler } from './handler.js';
 import { websocket } from './websocket.js';
 import { boolean_env, bytes_env, env, number_env } from './env.js';
@@ -55,7 +55,8 @@ options.maxRequestBodySize = bytes_env('BODY_SIZE_LIMIT', options.maxRequestBody
 const shutdown_timeout = number_env('SHUTDOWN_TIMEOUT', 30);
 
 options.fetch = handler;
-options.routes = routes;
+// the static file handlers never read the socket data
+options.routes = /** @type {Serve.Routes<WebSocketHandler, string>} */ (routes);
 options.websocket = { ...websocket_options, ...websocket };
 
 const server = Bun.serve(options);

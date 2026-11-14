@@ -1,6 +1,6 @@
 {
 	"name": "@chtibizoux/sveltekit-adapter-bun",
-	"version": "1.0.0-ws.1",
+	"version": "1.0.1-ws.1",
 	"description": "Fork of @sveltejs/adapter-bun with WebSocket support",
 	"keywords": [
 		"adapter",
